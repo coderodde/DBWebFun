@@ -2,7 +2,6 @@ package net.coderodde.web.db.fun.model;
 
 import java.sql.Date;
 
-
 public final class FunnyPerson {
 
     private int id;

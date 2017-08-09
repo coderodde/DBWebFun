@@ -105,7 +105,6 @@ public class AddPersonController extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+        return "This servlet adds new persons to the database.";
+    }
 }

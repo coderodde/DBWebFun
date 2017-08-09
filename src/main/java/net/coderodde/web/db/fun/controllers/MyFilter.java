@@ -30,9 +30,6 @@ public class MyFilter implements javax.servlet.Filter {
             ServletResponse response,
             FilterChain chain)
             throws IOException, ServletException {
-        HttpServletRequest hsr = (HttpServletRequest) request;
-        String requestURI = hsr.getRequestURI();
-
         ((HttpServletResponse) response)
                 .sendRedirect("/DBWebFun/show/" + id + "/" + firstName);
     }
