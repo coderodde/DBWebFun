@@ -19,13 +19,6 @@ import net.coderodde.web.db.fun.model.FunnyPerson;
 public class AddPersonController extends HttpServlet {
 
     /**
-     * The SQL command for inserting a person.
-     */
-    private static final String INSERT_PERSON_SQL = 
-            "INSERT INTO funny_persons (first_name, last_name, email) VALUES " +
-            "(?, ?, ?);";
-
-    /**
      * Handles the HTTP <code>GET</code> method.
      *
      * @param request  the servlet request.
@@ -74,7 +67,7 @@ public class AddPersonController extends HttpServlet {
                 out.println("The email is empty.");
                 return;
             }
-            
+
             FunnyPerson person = new FunnyPerson();
             person.setFirstName(firstName);
             person.setLastName(lastName);

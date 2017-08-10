@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 import net.coderodde.web.db.fun.model.FunnyPerson;
 
 public final class DataAccessObject {
-    
+
     /**
      * For validating the email addresses.
      */
@@ -26,7 +26,7 @@ public final class DataAccessObject {
     private static final String INSERT_PERSON_SQL = 
             "INSERT INTO funny_persons (first_name, last_name, email) VALUES " +
             "(?, ?, ?);";
-    
+
     /**
      * Creates a new database if not already created.
      */
@@ -48,35 +48,35 @@ public final class DataAccessObject {
                 "last_name VARCHAR(40) NOT NULL,\n" +
                 "email VARCHAR(50) NOT NULL,\n" +
                 "created TIMESTAMP);";
-    
+
     /**
      * The SQL for selecting a user given his/her ID.
      */
     private static final String GET_USER_BY_ID_SQL = 
             "SELECT * FROM funny_persons WHERE id = ?;";
-    
+
     private final MysqlDataSource mysqlDataSource;
-    
+
     private DataAccessObject(MysqlDataSource mysqlDataSource) {
         this.mysqlDataSource = Objects.requireNonNull(
                 mysqlDataSource, 
                 "The MysqlDataSource is null.");
     }
-    
+
     private static final DataAccessObject INSTANCE;
-    
+
     static {
         MysqlDataSource mysqlDataSource = new MysqlDataSource();
         mysqlDataSource.setUser("root");
-        mysqlDataSource.setPassword("your_password");
+        mysqlDataSource.setPassword("");
         mysqlDataSource.setURL("jdbc:mysql://localhost:3306/funny_db");
         INSTANCE = new DataAccessObject(mysqlDataSource);
     }
-    
+
     public static DataAccessObject instance() {
         return INSTANCE;
     }
-    
+
     /**
      * Adds a person to the database.
      * 
@@ -84,7 +84,7 @@ public final class DataAccessObject {
      */
     public void addPerson(FunnyPerson person) {
         checkPerson(person);
-        
+
         try (Connection connection = mysqlDataSource.getConnection()) {
             try (PreparedStatement statement = 
                     connection.prepareStatement(INSERT_PERSON_SQL)) {
@@ -97,7 +97,7 @@ public final class DataAccessObject {
             throw new RuntimeException(ex);
         }
     }
-    
+
     /**
      * Creates the empty database and the table.
      */
@@ -112,7 +112,7 @@ public final class DataAccessObject {
             throw new RuntimeException(ex);
         }
     }
-    
+
     /**
      * Gets a user by his/her ID.
      * 
@@ -125,20 +125,20 @@ public final class DataAccessObject {
             try (PreparedStatement statement = 
                     connection.prepareStatement(GET_USER_BY_ID_SQL)) {
                 statement.setInt(1, id);
-                
+
                 try (ResultSet resultSet = statement.executeQuery()) {
                     if (!resultSet.next()) {
                         return null;
                     }
-                    
+
                     FunnyPerson person = new FunnyPerson();
-                    
+
                     person.setId(resultSet.getInt("id"));
                     person.setFirstName(resultSet.getString("first_name"));
                     person.setLastName(resultSet.getString("last_name"));
                     person.setEmail(resultSet.getString("email"));
                     person.setCreated(resultSet.getDate("created"));
-                    
+
                     return person;
                 }
             }
@@ -146,28 +146,28 @@ public final class DataAccessObject {
             throw new RuntimeException(ex);
         }
     }
-    
+
     private void checkPerson(FunnyPerson person) {
         Objects.requireNonNull(person, "The person is null.");
         Objects.requireNonNull(person.getFirstName(), 
                                "The first name is null.");
-        
+
         Objects.requireNonNull(person.getLastName(), "The last name is null.");
         Objects.requireNonNull(person.getEmail(), "The email is null.");
-        
+
         if (person.getFirstName().trim().isEmpty()) {
             throw new IllegalArgumentException("The first name is empty.");
         }
-        
+
         if (person.getLastName().trim().isEmpty()) {
             throw new IllegalArgumentException("The last name is empty.");
         }
-        
+
         if (!validate(person.getEmail().trim())) {
             throw new IllegalArgumentException("Invalid email address.");
         }
     }
-    
+
     /**
      * Checks the email address.
      * 

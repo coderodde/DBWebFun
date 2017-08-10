@@ -1,20 +1,14 @@
 package net.coderodde.web.db.fun.controllers;
 
 import com.google.gson.Gson;
-import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.coderodde.web.db.fun.model.FunnyPerson;
-
 
 /**
  * This controller is responsible for viewing persons.
@@ -62,34 +56,29 @@ public class ShowPersonController extends HttpServlet {
                 out.println("Error: " + idString + " is not an integer.");
                 return;
             }
-            
+
             FunnyPerson person = DataAccessObject.instance().getUserById(id);
-            
+
             if (person == null) {
                 out.println("Error: no person with ID = " + id + ".");
                 return;
             }
 
             String matchFirstName = null;
-            
+
             if (tokens.length == 2) {
                 matchFirstName = tokens[1];
             }
-            
+
             if (!person.getFirstName().equals(matchFirstName)) {
                 response.sendRedirect("/DBWebFun/show/" + id + "/" + 
                                       person.getFirstName());
                 return;
             }
-            
+
             Gson gson = new Gson();
             out.println(gson.toJson(person));
         }
-    }
-
-    private void handleInvalidRequest(HttpServletRequest request,
-                                      HttpServletResponse response) {
-
     }
 
     /**
