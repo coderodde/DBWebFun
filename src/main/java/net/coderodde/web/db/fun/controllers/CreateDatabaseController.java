@@ -1,17 +1,12 @@
 package net.coderodde.web.db.fun.controllers;
 
-import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import static net.coderodde.web.db.fun.controllers.DBUtils.close;
 
 /**
  * This controller creates the database if it is not yet created.
@@ -22,28 +17,7 @@ import static net.coderodde.web.db.fun.controllers.DBUtils.close;
 @WebServlet(name = "CreateDatabaseController", urlPatterns = {"/create"})
 public class CreateDatabaseController extends HttpServlet {
 
-    /**
-     * Creates a new database if not already created.
-     */
-    private static final String CREATE_DATABASE_SQL = 
-            "CREATE DATABASE IF NOT EXISTS funny_db;";
-    
-    /**
-     * Switches to 'funny_db'.
-     */
-    private static final String USE_DATABASE_SQL = "USE funny_db";
-    
-    /**
-     * Creates the table if not already created.
-     */
-    private static final String CREATE_TABLE_SQL =
-            "CREATE TABLE IF NOT EXISTS funny_persons (\n" +
-                "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,\n" +
-                "first_name VARCHAR(40) NOT NULL,\n" +
-                "last_name VARCHAR(40) NOT NULL,\n" +
-                "email VARCHAR(50) NOT NULL,\n" +
-                "created TIMESTAMP);";
-    
+
     /**
      * If not yet created, this request creates the database and the table.
      *
@@ -55,32 +29,13 @@ public class CreateDatabaseController extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        
+
         try (PrintWriter out = response.getWriter()) {
-            MysqlDataSource mysql = DefaultDataSourceCreator.create();
-            Connection connection = null;
-            PreparedStatement statement = null;
-            boolean error = false;
-            
             try {
-                connection = mysql.getConnection();
-                statement = connection.prepareStatement(CREATE_DATABASE_SQL);
-                statement.execute();
-                
-                statement = connection.prepareStatement(USE_DATABASE_SQL);
-                statement.execute();
-                
-                statement = connection.prepareStatement(CREATE_TABLE_SQL);
-                statement.execute();
-            } catch (SQLException ex) {
-                error = true;
-                out.println("Error: " + ex.getMessage());
-            } finally {
-                close(null, statement, connection);
-            }
-            
-            if (!error) {
-                out.println("Database 'funny_db' is created!");
+                DataAccessObject.instance().createDatabase();
+                out.println("Database created!");
+            } catch (RuntimeException ex) {
+                out.println("Error: " + ex.getCause().getMessage());
             }
         }
     }

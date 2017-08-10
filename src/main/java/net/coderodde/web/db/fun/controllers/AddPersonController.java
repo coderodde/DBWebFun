@@ -1,17 +1,13 @@
 package net.coderodde.web.db.fun.controllers;
 
-import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import static net.coderodde.web.db.fun.controllers.DBUtils.close;
+import net.coderodde.web.db.fun.model.FunnyPerson;
 
 /**
  * This controller is responsible for creating new persons.
@@ -28,7 +24,7 @@ public class AddPersonController extends HttpServlet {
     private static final String INSERT_PERSON_SQL = 
             "INSERT INTO funny_persons (first_name, last_name, email) VALUES " +
             "(?, ?, ?);";
-    
+
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -58,42 +54,37 @@ public class AddPersonController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        
+
         try (PrintWriter out = response.getWriter()) {
             String firstName = request.getParameter("first_name");
             String lastName = request.getParameter("last_name");
             String email = request.getParameter("email");
-            
+
             if (firstName.isEmpty()) {
                 out.println("The first name is empty.");
                 return;
             }
-            
+
             if (lastName.isEmpty()) {
                 out.println("The last name is empty.");
                 return;
             }
-            
+
             if (email.isEmpty()) {
                 out.println("The email is empty.");
                 return;
             }
             
-            MysqlDataSource mysql = DefaultDataSourceCreator.create();
-            Connection connection = null;
-            PreparedStatement statement = null;
-            
+            FunnyPerson person = new FunnyPerson();
+            person.setFirstName(firstName);
+            person.setLastName(lastName);
+            person.setEmail(email);
+
             try {
-                connection = mysql.getConnection();
-                statement = connection.prepareStatement(INSERT_PERSON_SQL);
-                statement.setString(1, firstName);
-                statement.setString(2, lastName);
-                statement.setString(3, email);
-                statement.executeUpdate();
-            } catch (SQLException ex) {
-                out.println("Error: " + ex.getMessage());
-            } finally {
-                close(null, statement, connection);
+                DataAccessObject.instance().addPerson(person);
+                out.println("Person " + person + " created!");
+            } catch (RuntimeException ex) {
+                out.println("Error: " + ex.getCause().getMessage());
             }
         }
     }
